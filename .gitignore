@@ -1,0 +1,8 @@
+#General Files
+.project
+.classpath
+.DS_Store
+nb-configuration.xml
+manifest.mf
+build*
+/dist/
