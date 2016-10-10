@@ -813,7 +813,7 @@ public class DataBoard
       *                                      being saved to the ARFF file.
       * @param	databoard_file               The ARFF file to be saved into.
       * @param	use_top_level_features       Whether or not to save overall
-      *                                      classifications for individual
+      *                                      features for individual
       *                                      instances.
       * @param	use_sub_section_features     Whether or not to save the sub-
       *                                      sections of instances.
@@ -1013,8 +1013,262 @@ public class DataBoard
           // Return the identifiers
           return identifiers.toArray(new String[1]);
      }
+	 
+	 
+	/**
+	 * Produces a CSV file based on the contents of this object. The first row of the CSV file will list the
+	 * feature names (with multi-dimensional features including a feature index number added at the end of the
+	 * feature name). Each other row will consist of first the instance identifier (if desired), followed by
+	 * the value of each feature. The user has the option to only save overall features for each instance,
+	 * only save sub-section features for each instance, or both. The user also has the option of having the
+	 * first row indicate the names of each feature (multi-dimensional features are assigned a feature index
+	 * number, which is added at the end of the feature name.
+	 * 
+	 * <p> An array of strings is returned. There is one entry for each data line saved to the CSV file, with
+	 * the entry identifying the instance and (if appropriate) the section that each CSV data line corresponds
+	 * to.</p>
+	 *
+	 * <p> If the model_classifications field is null, no model classes are saved. If the taxonomy field is
+	 * null, then the class names are extracted from the model_classifications field if it is not null. If
+	 * no classification are available, none are saved. Since CSV files cannot explicitly accommodate multiple
+	 * classes per instance, the vector for an instance with multiple classes is repeated multiple times, once
+	 * for each class. <b>WARNING:</b> saving of class names has not yet been fully tested.</p>
+	 *
+	 * <p><b>IMPORTANT:</b> All feature names and class names have blank spaces replaced by underscores in the
+	 * CSV file.</p>
+	 *
+	 * <p><b>IMPORTANT:</b> Missing feature values are marked with a question sign.</p>
+	 *
+	 * @param	save_file						The File to save the CSV data to.
+	 * @param	include_feature_names			Whether or not to include the names of features in the first
+	 *											row of the CSV file.
+	 * @param	include_instance_identifiers	Whether or not to include instance identifiers in the first
+	 *											column of the CSV file
+	 * @param	include_class_names				Whether to include class labels in the last column of the CSV
+	 *											file.
+	 * @param	include_top_level_features		Whether or not to save overall features for individual 
+	 *											instances.
+	 * @param	include_sub_section_features	Whether or not to save the sub-sections features of individual 
+	 *											instances.
+	 * @return									The dataset and section identifiers corresponding to each
+	 *											feature vector line saved in the CSV file.
+	 * @throws	Exception						An exception is thrown if no feature definitions or no feature
+	 *											vectors are provided. An exception is also thrown if both of 
+	 *											the boolean parameters are false.
+	 */
+	public String[] saveToCSV( File save_file,
+							   boolean include_feature_names,
+							   boolean include_instance_identifiers,
+							   boolean include_class_names,
+							   boolean include_top_level_features,
+							   boolean include_sub_section_features )
+	throws Exception
+	{
+		// Throw exceptions if the feature vectors
+		// are not available or if it is specified not to record any features
+		if (!include_top_level_features && !include_sub_section_features)
+		{
+			throw new Exception("Cannot save CSV file because it has been\n"
+					+ "specified to store neither top-level nor\n"
+					+ "sub-section features.");
+		}
+		if (feature_vectors == null)
+		{
+			throw new Exception("Cannot save CSV file because no feature\n"
+					+ "vectors are available.");
+		}
 
+		// Prepare feature definitions if they are not available
+		FeatureDefinition[] these_feature_definitions = feature_definitions;
+		if (these_feature_definitions == null)
+		{
+			these_feature_definitions = FeatureDefinition.generateFeatureDefinitions(feature_vectors);
+			if (these_feature_definitions == null)
+			{
+				throw new Exception("Cannot save ARFF file because no feature\n"
+						+ "definitions are available.");
+			}
+		}
 
+		// Prepare stream writer
+		FileOutputStream to = new FileOutputStream(save_file);
+		DataOutputStream writer = new DataOutputStream(to);
+
+		// Write the feature names, if requested
+		if (include_feature_names)
+		{
+			if (include_instance_identifiers)
+				writer.writeBytes(",");
+			
+			for (int i = 0; i < these_feature_definitions.length; i++)
+			{
+				if (these_feature_definitions[i].dimensions == 1)
+					writer.writeBytes(these_feature_definitions[i].name.replace(' ', '_'));
+				else
+				{
+					for (int j = 0; j < these_feature_definitions[i].dimensions; j++)
+					{
+						writer.writeBytes(these_feature_definitions[i].name.replace(' ', '_') + "_" + j);
+						if (j != these_feature_definitions[i].dimensions - 1)
+							writer.writeBytes(",");
+					}
+				}
+
+				if (i == these_feature_definitions.length - 1)
+					writer.writeBytes("\n");
+				else
+					writer.writeBytes(",");
+			}
+		}
+
+		// Find the model classifications of data sets overall and of their sections
+		String[][] model_classifications_overall = null;
+		String[][][] model_classifications_sections = null;
+		if (model_classifications != null)
+		{
+			if (include_top_level_features)
+			{
+				model_classifications_overall
+						= SegmentedClassification.getOverallLabelsOfDataSets(feature_vectors,
+								model_classifications);
+			}
+			if (include_sub_section_features)
+			{
+				model_classifications_sections
+						= SegmentedClassification.getSubSectionLabelsOfDataSets(feature_vectors,
+								model_classifications);
+			}
+		}
+
+		// Write the feature vectors and, if requested, the model classifications (if any)
+		// and instance identifiers.
+		LinkedList<String> identifiers = new LinkedList<>();
+		for (int i = 0; i < feature_vectors.length; i++)
+		{
+			// Process top-level overall features
+			if (include_top_level_features)
+			{
+				// Find the top-level overall feature values
+				String[][] top_feat_vals = feature_vectors[i].getFeatureValuesOfTopLevel(these_feature_definitions);
+
+				// Write the top-level overall feature values and model classifications
+				if (top_feat_vals != null)
+				{
+					// May need to repeat a given instance multiple times
+					// if it has multiple classes
+					int classes = 1;
+					if (model_classifications_overall != null)
+						if (model_classifications_overall[i] != null)
+								classes = model_classifications_overall[i].length;
+	
+					// Write the data
+					for (int cla = 0; cla < classes; cla++)
+					{
+						// Write the insantce identifier, if requested
+						if (include_instance_identifiers)
+							writer.writeBytes("\"" + feature_vectors[i].identifier + "\",");
+
+						// Write the feature values and model classifications
+						for (int j = 0; j < top_feat_vals.length; j++)
+						{
+							for (int k = 0; k < top_feat_vals[j].length; k++)
+							{
+								// Write the feature value
+								writer.writeBytes(top_feat_vals[j][k]);
+
+								// Write the model classification if features done
+								if (j == top_feat_vals.length - 1 && k == top_feat_vals[j].length - 1)
+								{
+									if (model_classifications_overall != null)
+									{
+										if (model_classifications_overall[i] != null)
+											writer.writeBytes(", " + model_classifications_overall[i][cla].replace(' ', '_'));
+										else writer.writeBytes(", ?");
+									}
+									writer.writeBytes("\n");
+
+									// Store the identifier
+									identifiers.add(feature_vectors[i].identifier);
+								}
+								else writer.writeBytes(", ");
+							}
+						}
+					}
+				}
+			}
+
+			// Process features of sub-sections
+			if (include_sub_section_features)
+			{
+				// Find the sub-section feature values
+				String[][][] sec_feat_vals = feature_vectors[i].getFeatureValuesOfSubSections(these_feature_definitions);
+
+				// Write the sub-section feature values and model classifications
+				// for each sub-section
+				if (sec_feat_vals != null)
+				{
+					for (int sec = 0; sec < sec_feat_vals.length; sec++)
+					{
+						if (sec_feat_vals[sec] != null)
+						{
+							// May need to repeat a given instance multiple times
+							// if it has multiple classes
+							int classes = 1;
+							if (model_classifications_sections != null)
+								if (model_classifications_sections[i] != null)
+									if (model_classifications_sections[i][sec] != null)
+										classes = model_classifications_sections[i][sec].length;
+
+							// Write the feature values and model classifications
+							for (int cla = 0; cla < classes; cla++)
+							{
+								// Write the insantce identifier, if requested
+								if (include_instance_identifiers)
+									writer.writeBytes("\"" + feature_vectors[i].identifier + "_" + sec + "\",");
+
+								for (int j = 0; j < sec_feat_vals[sec].length; j++)
+								{
+									for (int k = 0; k < sec_feat_vals[sec][j].length; k++)
+									{
+										// Write the feature value
+										writer.writeBytes(sec_feat_vals[sec][j][k]);
+
+										// Write the model classification if features done
+										if (j == sec_feat_vals[sec].length - 1 && k == sec_feat_vals[sec][j].length - 1)
+										{
+											if (model_classifications_sections != null)
+											{
+												if (model_classifications_sections[i] != null)
+												{
+													if (model_classifications_sections[i][sec] != null)
+														writer.writeBytes(", " + model_classifications_sections[i][sec][cla].replace(' ', '_'));
+													else writer.writeBytes(", ?");
+												}
+											}
+											writer.writeBytes("\n");
+
+											// Store the identifier
+											identifiers.add(feature_vectors[i].identifier + ":  Start=" + feature_vectors[i].sub_sets[sec].start + "Stop=" + feature_vectors[i].sub_sets[sec].stop);
+										}
+										else writer.writeBytes(", ");
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Close the output streams
+		writer.close();
+		to.close();
+
+		// Return the identifiers
+		return identifiers.toArray(new String[1]);
+	}
+
+	 
      /**
       * Saves the stored taxonomy, feature definitions, feature vectors and/or
       * model classifications stored in this DataBoard to individual XML files
