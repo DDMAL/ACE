@@ -96,13 +96,13 @@ public class Coordinator {
      *
      * <p> NOTE: for <i>training_classifier_type</i>,
      * the codes for the types of Weka classifiers are as follows:
-     * <li>Unweighted k-nn (k = 1): IBk
-     * <li>Naive Bayesian (Gaussian): NaiveBayes
-     * <li>Support Vector Machine: SMO
-     * <li>C4.5 Decision Tree: J48
-     * <li>Backdrop Neural Network: MultilayerPerceptron
-     * <li>AdaBoost seeded with C4.5 Decision Trees: AdaBoostM1
-     * <li>Bagging seeded with C4.5 Decision Trees: Bagging
+     * <p>- Unweighted k-nn (k = 1): IBk
+     * - Naive Bayesian (Gaussian): NaiveBayes
+     * - Support Vector Machine: SMO
+     * - C4.5 Decision Tree: J48
+     * - Backdrop Neural Network: MultilayerPerceptron
+     * - AdaBoost seeded with C4.5 Decision Trees: AdaBoostM1
+     * - Bagging seeded with C4.5 Decision Trees: Bagging
      *
      * @param   max_class_membership_spread     The maximum ratio of instances that are permitted
      *						belonging to different classes. For example,
@@ -253,13 +253,13 @@ public class Coordinator {
      *
      * <p> NOTE: for <i>cross_validation_classifier_type</i>,
      * the codes for the types of WEKA classifiers are as follows:
-     * <li>Unweighted k-nn (k = 1): IBk
-     * <li>Naive Bayesian (Gaussian): NaiveBayes
-     * <li>Support Vector Machine: SMO
-     * <li>C4.5 Decision Tree: J48
-     * <li>Backdrop Neural Network: MultilayerPerceptron
-     * <li>AdaBoost seeded with C4.5 Decision Trees: AdaBoostM1
-     * <li>Bagging seeded with C4.5 Decision Trees: Bagging
+     * <p>- Unweighted k-nn (k = 1): IBk
+     * - Naive Bayesian (Gaussian): NaiveBayes
+     * - Support Vector Machine: SMO
+     * - C4.5 Decision Tree: J48
+     * - Backdrop Neural Network: MultilayerPerceptron
+     * - AdaBoost seeded with C4.5 Decision Trees: AdaBoostM1
+     * - Bagging seeded with C4.5 Decision Trees: Bagging
      *
      * @param   max_class_membership_spread The maximum ratio of instances that are permitted
      *                                      belonging to different classes. For example,
@@ -632,7 +632,7 @@ public class Coordinator {
      *                              exhaustive search.
      * @param out                   Output stream to which status reports and results
      *                              will be printed.
-     * @param verbose
+     * @param verbose				Whether verbose reporting is to be used.
      * @return                      A String describing the dimensionality reduction
      *                              that was performed.
      * @throws java.lang.Exception  If an error occurs.

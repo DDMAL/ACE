@@ -16,7 +16,7 @@ import java.io.File;
 
 
 /**
- * A holder class for the XMLDocumentParser</code> method. This method is a
+ * A holder class for the <code>XMLDocumentParser</code> method. This method is a
  * general purpose method for loading an XML file, testing that the file exists,
  * validating it as a valid XML file, ensuring that it is of the correct type,
  * parsing it and extracting its data into the required form. Informative error

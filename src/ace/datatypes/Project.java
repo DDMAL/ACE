@@ -30,42 +30,6 @@ import java.io.*;
  * themselves, therefore the files themselves must be stored in a location that ACE can
  * access.
  *
- * <p>The following is an example of an ACE XML project file:
- * <p><code>
- * &#60?xml version="1.0"?&#62<br>
- * &#60!DOCTYPE ace_project_file [<br>
- *  &#60!ELEMENT ace_project_file (comments, taxonomy_path, feature_definitions_path, feature_vectors_path, model_classifications_path, gui_preferences_path, classifier_settings_path, trained_classifiers_path, weka_arff_path)&#62<br>
- *  &#60!ELEMENT comments (#PCDATA)&#62<br>
- *  &#60!ELEMENT taxonomy_path (#PCDATA)&#62<br>
- *  &#60!ELEMENT feature_definitions_path (path*)&#62<br>
- *  &#60!ELEMENT feature_vectors_path (path*)&#62<br>
- *  &#60!ELEMENT model_classifications_path (path*)&#62<br>
- *  &#60!ELEMENT gui_preferences_path (#PCDATA)&#62<br>
- *  &#60!ELEMENT classifier_settings_path (#PCDATA)&#62<br>
- *  &#60!ELEMENT trained_classifiers_path (#PCDATA)&#62<br>
- *  &#60!ELEMENT weka_arff_path (#PCDATA)&#62<br>
- *  &#60!ELEMENT path (#PCDATA)&#62<br>
- * ]&#62<br>
- * <br>
- * &#60ace_project_file&#62<br>
- *  &nbsp&nbsp&#60comments&#62this is a comment&#60/comments&#62<br>
- *  &nbsp&nbsp&#60taxonomy_path&#62/jMIR/ACE/ADDITIONAL_FILES/TestFiles/Taxonomy.xml&#60/taxonomy_path&#62<br>
- *  &nbsp&nbsp&#60feature_definitions_path&#62<br>
- *     &nbsp&nbsp&nbsp&nbsp&#60path&#62/jMIR/ACE/ADDITIONAL_FILES/TestFiles/FeatureKey.xml&#60/path&#62<br>
- *  &nbsp&nbsp&#60/feature_definitions_path&#62<br>
- *  &nbsp&nbsp&#60feature_vectors_path&#62<br>
- *     &nbsp&nbsp&nbsp&nbsp&#60path&#62/jMIR/ACE/ADDITIONAL_FILES/TestFiles/FeatureVectors.xml&#60/path&#62<br>
- *  &nbsp&nbsp&#60/feature_vectors_path&#62<br>
- *  &nbsp&nbsp&#60model_classifications_path&#62<br>
- *     &nbsp&nbsp&nbsp&nbsp&#60path&#62/jMIR/ACE/ADDITIONAL_FILES/TestFiles/Classifications.xml&#60/path&#62<br>
- *  &nbsp&nbsp&#60/model_classifications_path&#62<br>
- *  &nbsp&nbsp&#60gui_preferences_path&#62&#60/gui_preferences_path&#62<br>
- *  &nbsp&nbsp&#60classifier_settings_path&#62&#60/classifier_settings_path&#62<br>
- *  &nbsp&nbsp&#60trained_classifiers_path&#62&#60/trained_classifiers_path&#62<br>
- *  &nbsp&nbsp&#60weka_arff_path&#62&#60/weka_arff_path&#62<br>
- * &#60/ace_project_file&#62<br>
- * </code>
- *
  * @author Cory McKay (ACE 1.x) and Jessica Thompson (ACE 2.x)
  */
 public class Project {
@@ -79,7 +43,7 @@ public class Project {
 
     /**
      * Comments concerning this ACE project to be included in the ACE XML project
-     * file with the &#60comments&gt tag.
+     * file with the comments tag.
      */
     public String comments;
 

@@ -88,7 +88,7 @@ public class InstancesTableModel
       * @param	display_feature_values	Whether or not to include on the table
       *                                 actual feature values stored in the
       *                                 DataBoard.
-      * @throws Exception
+      * @throws Exception				Throws an exception if a problem occurs.
       */
      public void fillTable( DataBoard data_board,
           String[] identifiers_to_expand,

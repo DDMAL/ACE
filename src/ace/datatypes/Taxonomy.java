@@ -90,6 +90,8 @@ public class Taxonomy
       * Generates a Taxonomy from a Weka ARFF file.
       * Generates an empty taxonomy with the name TaxonomyFromARFF
       * then adds the values of the class attribute one by one.
+	  * 
+	  * @param	instances	The instances containing class information.
       */
      public Taxonomy(Instances instances)
      {

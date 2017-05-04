@@ -330,7 +330,7 @@ public class MainGUIFrame
 
           // React to the about_menu_item
           if (event.getSource().equals(about_menu_item))
-               new mckay.utilities.gui.templates.AboutDialog(this, "ACE 2.2.1", "Cory McKay (ACE 1.x) and Jessica Thompson (ACE 2.x)", "2010 (GNU GPL)", "McGill University");
+               new mckay.utilities.gui.templates.AboutDialog(this, "ACE 2.2.2", "Cory McKay (ACE 1.x) and Jessica Thompson (ACE 2.x)", "2017 (GNU GPL)", "Marianopolis College and McGill University");
 
           // React to the view_manual_menu_item
           if (event.getSource().equals(view_manual_menu_item))
@@ -495,11 +495,11 @@ public class MainGUIFrame
           tabbed_pane.setSelectedIndex(2);
 
           // Set up help dialog box
-          String help_path = "ProgramFiles" + File.separator + "Help" + File.separator;
-          mckay.utilities.gui.templates.HelpDialog help_dialog =
-               new mckay.utilities.gui.templates.HelpDialog(help_path + "contents.html", help_path + "title_page.html");
+          String help_path = "." + File.separator + "ACE_Manual" + File.separator;
+          help_dialog =
+               new mckay.utilities.gui.templates.HelpDialog(help_path + "EmptyContents.html", help_path + "ACEManual.html");
 
-          // Cause program to quit when the exit box is pressed
+		  // Cause program to quit when the exit box is pressed
           addWindowListener(new WindowAdapter()
           {
                public void windowClosing(WindowEvent e)

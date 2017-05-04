@@ -25,13 +25,13 @@ import java.util.LinkedList;
  *
  * <p> NOTE: for <i>training_classifier_type</i> and <i>cross_validation_classifier_type</i>,
  * the codes for the types of WEKA classifiers are as follows:
- * <li>Unweighted k-nn (k = 1): IBk
- * <li>Naive Bayesian (Gaussian): NaiveBayes
- * <li>Support Vector Machine: SMO
- * <li>C4.5 Decision Tree: J48
- * <li>Backdrop Neural Network: MultilayerPerceptron
- * <li>AdaBoost seeded with C4.5 Decision Trees: AdaBoostM1
- * <li>Bagging seeded with C4.5 Decision Trees: Bagging
+ * <p>- Unweighted k-nn (k = 1): IBk
+ * - Naive Bayesian (Gaussian): NaiveBayes
+ * - Support Vector Machine: SMO
+ * C4.5 Decision Tree: J48
+ * Backdrop Neural Network: MultilayerPerceptron
+ * AdaBoost seeded with C4.5 Decision Trees: AdaBoostM1
+ * Bagging seeded with C4.5 Decision Trees: Bagging
  *
  * @author Cory McKay (ACE 1.x) and Jessica Thompson (ACE 2.x)
  */

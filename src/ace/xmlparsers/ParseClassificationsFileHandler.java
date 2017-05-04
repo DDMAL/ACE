@@ -122,7 +122,7 @@ public class ParseClassificationsFileHandler
       * Instantiates new objects when necessary and lets the characters method
       * know what kind of action to take.
       *
-      * @param  namespace
+      * @param  namespace	The namespace.
       * @param	name		Name of the element that is encountered.
       * @param	atts		The attributes encountered.
       * @throws	SAXException	Exception thrown if is wrong type of XML file.

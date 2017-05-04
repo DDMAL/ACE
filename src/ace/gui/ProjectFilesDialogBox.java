@@ -868,7 +868,7 @@ public class ProjectFilesDialogBox
           ((DefaultListModel) (feature_vectors_field.getModel())).addElement(parent.project.feature_vectors_paths[0]);
      }*/
 
-     /*
+     /**
       * Sets the text fields of this ProjectFilesDiologBox to reflect the contents
       * of the current Project object. If the corresponding field in the project
       * obbject is null, then the text field is set to "".

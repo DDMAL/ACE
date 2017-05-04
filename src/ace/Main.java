@@ -1,8 +1,8 @@
 /*
  * Main.java
- * Version 2.2.1
+ * Version 2.2.2
  *
- * Last modified on July 26, 2010.
+ * Last modified on May 4, 2017.
  * McGill University
  */
 
@@ -20,10 +20,10 @@ public class Main
     /**
      * Determines whether to run ACE from the GUI or the command line based on
      * command line flags.
-     * <p>
-     * <li> If one of -train, -test, -cv, or -exp are given at the command line,
+     * 
+     * <p>-If one of -train, -test, -cv, or -exp are given at the command line,
      * ACE will run from the command line and the GUI will not open.
-     * <li> If none of these options are specified, ACE will run from the GUI.
+     * - If none of these options are specified, ACE will run from the GUI.
      *
      * @param args The command line arguments
      */
