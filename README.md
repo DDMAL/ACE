@@ -1,5 +1,6 @@
 # ACE 2.2.2
 by Cory McKay (ACE 1.x) and Jessica Thompson (ACE 2.x)
+CIRMMT / Marianopolis College / McGill University
 Copyright (C) 2017 (GNU GPL)
 
 
@@ -39,7 +40,7 @@ Please contact Cory McKay (cory.mckay@mail.mcgill.ca) with any bug reports
 or questions relating to the software. 
 
 
-### LICENSING AND LIABILITY -- 
+### LICENSING AND LIABILITY 
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -53,27 +54,27 @@ You may obtain a copy of the GNU General Public License by writing to the Free
 Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 This project software makes use of two included third-party products.
+
 The University of Waikato Weka data mining package is used to parse and
 save Weka ARFF files. This software is also available under the GNU GPL,
 and more information on it is available at 
 http://www.cs.waikato.ac.nz/ml/weka. 
 
- This project also includes software developed by the Apache Software 
- Foundation (http://www.apache.org), namely the Xerces library, which is used
- to parse XML files. The Xerces license can be accessed via the manual.
+This project also includes software developed by the Apache Software 
+Foundation (http://www.apache.org), namely the Xerces library, which is used
+to parse XML files. The Xerces license can be accessed via the manual.
 
 
 ### COMPATIBILITY
 
 This software is written in Java, which means that it can theoretically be run
 on any system that has the Java Runtime Environment (JRE) installed on it. It 
-is recommended that this software be used with Windows XP, however, as it was 
-developed and tested under the Windows XP operating system, and the interface's 
+is recommended that this software be used with Windows, however, as it was 
+developed and tested under the Windows operating system, and the interface's 
 appearance was developed under Windows. Although the software should 
-theoretically run under earlier versions of Windows, OS X, Linux, Solaris or 
-any other operating system with the JRE installed on it, users should be advised
-that the software has not yet been tested on other platforms, so difficulties
-may be encountered.
+theoretically run under OS X, Linux, Solaris or any other operating system with
+the JRE installed on it, users should be advised that the software has not yet 
+been fully tested on other platforms, so difficulties may be encountered.
 
 This software was developed with version 1.6.0_16 of the JDK (Java Development 
 Kit), so it is suggested that the corresponding version or higher of the JRE be
@@ -92,7 +93,7 @@ When the JRE download is complete, follow the installation instructions that
 come with it in order to install it.
 
 
-### INSTALLING ACE
+### INSTALLING THE PROJECT
 
 The project can be accessed at http://jmir.sourceforge.net. This distribution
 includes a pre-compiled Jar file, the source code and extensive documentation. 
@@ -131,7 +132,7 @@ build (in the NetBeans context, this means adding the jar files found here as
 libraries).
 
 
-### RUNNING ACE
+### RUNNING THE SOFTWARE
 
 A file named "ACE.jar" is produced upon installation. Double clicking
 on this file will open the GUI. However, the GUI currently only allows
@@ -168,7 +169,8 @@ ACE 2.2.2
 - Updated the saveToARFF method in ace.datatypes.DataBoard to auto-
 generate feature definitions if they are not explicitly present.
 - Fixed a bug in the GUI manual display.
-- Updated UtilityClasses support libraries.
+- Updated support libraries.
+- Minor documentation updates.
 
 ACE 2.2.1
 - Fixed a bug related to parsing ACE XML files.
