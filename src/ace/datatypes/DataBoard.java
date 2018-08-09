@@ -45,10 +45,10 @@ public class DataBoard
 
 
      /**
-      * Holds meta-data about the feautres that characterize instances.
+      * Holds metadata about the features that characterize instances.
       *
       * <p>May be null if the feature_vectors have sufficient self-contained
-      * infromation, although this is not recommended.
+      * information, although this is not recommended.
       */
      public    FeatureDefinition[]           feature_definitions;
 

@@ -1,9 +1,10 @@
 /*
  * ParseFeatureDefinitionsFileHandler.java
- * Version 2.2.1
+ * Version 2.3
  *
- * Last modified on July 26, 2010.
- * McGill University
+ * Last modified on August 9, 2018.
+ * McGill University and Marianopolis College.
+
  */
 
 package ace.xmlparsers;
@@ -136,6 +137,8 @@ public class ParseFeatureDefinitionsFileHandler
           // React depending on the type of tag
           if (name.equals("name"))
                current_definition.name = parsed_text;
+          else if (name.equals("code"))
+               current_definition.code = parsed_text;
           else if (name.equals("description"))
                current_definition.description = parsed_text;
           else if (name.equals("is_sequential"))
@@ -147,6 +150,8 @@ public class ParseFeatureDefinitionsFileHandler
           }
           else if (name.equals("parallel_dimensions"))
                current_definition.dimensions = Integer.parseInt(parsed_text);
+          else if (name.equals("extractor"))
+               current_definition.extractor = parsed_text;
 		  else if (name.equals("feature"))
                definitions.add(current_definition);
      }

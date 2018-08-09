@@ -1,9 +1,9 @@
 /*
  * FeatureDefinition.java
- * Version 2.2
+ * Version 2.3
  *
- * Last modified on April 11, 2010.
- * McGill University
+ * Last modified on August 9, 2018.
+ * McGill University and Marianopolis College.
  */
 
 package ace.datatypes;
@@ -31,17 +31,25 @@ public class FeatureDefinition
 
 
      /**
-      * The name of the feature. This name should be unique among each set of
+      * The name of the feature. This name must be unique among each set of
       * features.
       */
-     public	String				name;
+     public	String					name;
+
+
+     /**
+      * An identifying code that, if present, should be uniquely associated with
+	  * the name of this feature (although this uniqueness is not validated as
+	  * name is validated). May be left as an empty string.
+      */
+     public	String					code;
 
 
      /**
       * A description of what the feature represents. May be left as an empty
       * string.
       */
-     public	String				description;
+     public	String					description;
 
 
      /**
@@ -50,39 +58,88 @@ public class FeatureDefinition
       * value of false means that the feature may only be extracted per data
       * set.
       */
-     public	boolean				is_sequential;
+     public	boolean					is_sequential;
 
 
      /**
       * The number of values that exist for the feature for a given section of a
       * data set. This value will be 1, except for multi-dimensional features.
       */
-     public	int				dimensions;
+     public	int						dimensions;
+
+
+     /**
+      * The software (and its version number) associated with this implementation
+	  * of this feature. May be left as an empty string.
+      */
+     public	String					extractor;
 
 
      /**
       * An identifier for use in serialization.
       */
-     private   static final long                serialVersionUID = 2L;
+     private   static final long	serialVersionUID = 2L;
 
 
      /* CONSTRUCTORS **********************************************************/
 
 
      /**
-      * Generate an empty FeatureDefinition with the name "Undefined Feature".
+      * Instantiate an empty FeatureDefinition with the name "Undefined Feature".
       */
      public FeatureDefinition()
      {
           name = "Undefined Feature";
-          description = new String("");
+		  code = "";
+          description = "";
           is_sequential = false;
           dimensions = 1;
+		  extractor = "";
      }
 
 
      /**
-      * Explicitly define a new Feature Definition.
+      * Instantiate an explicitly defined new Feature Definition.
+      *
+      * @param	name          The name of the feature. This name should be unique
+      *                       among each set of features.
+      * @param	code          The identifying code that, if present, must be uniquely
+      *                       associated with the name of this feature. May be left 
+      *                       as an empty string
+      * @param	description   A description of what the feature represents. May
+      *                       be left as an empty string.
+      * @param	is_sequential Specifies whether a feature can be applied to
+      *                       sequential windows of a data set. A value of true
+      *                       means that it can, and a value of false means that
+      *                       only one feature value may be extracted per data
+      *                       set.
+      * @param	dimensions    The number of values that exist for the feature
+      *                       for a given section of a data set. This value will
+      *                       be 1, except for multi-dimensional features.
+      * @param	extractor     The software (and its version number) associated with
+      *                       this implementation of this feature. May be left as an
+      *                       empty string.
+      */
+     public FeatureDefinition( String name,
+          String code,
+          String description,
+          boolean is_sequential,
+          int dimensions,
+          String extractor )
+     {
+          this.name = name;
+		  this.code = code;
+          this.description = description;
+          this.is_sequential = is_sequential;
+          this.dimensions = dimensions;
+		  this.extractor = extractor;
+     }
+
+	 
+     /**
+      * Instantiate an explicitly defined new Feature Definition, but without
+	  * a specified code or extractor. This is a legacy constructor from before
+	  * these two fields were added.
       *
       * @param	name          The name of the feature. This name should be
       *                       unique
@@ -104,22 +161,28 @@ public class FeatureDefinition
           int dimensions )
      {
           this.name = name;
+		  this.code = "";
           this.description = description;
           this.is_sequential = is_sequential;
           this.dimensions = dimensions;
+		  this.extractor = "";
      }
 
+	 
      /**
       * Generates a FeatureDefintition from a Weka ARFF file.
+	  * 
       * @param instances        The WEKA instances that were extracted from the ARFF file.
       * @param index            Specifies which attribute of the WEKA ARFF file should be used for this FeatureDefintion.
       */
      public FeatureDefinition(Instances instances, int index)
      {
         name = instances.attribute(index).name();
-        description = "";
+        code = "";
+		description = "";
         is_sequential = false;
         dimensions = 1;
+        extractor = "";
      }
 
 
@@ -134,9 +197,11 @@ public class FeatureDefinition
      public String getFeatureDescription()
      {
           String info = "NAME: " + name + "\n";
+		  info += "CODE: " + code + "\n";
           info += "DESCRIPTION: " + description + "\n";
           info += "IS SEQUENTIAL: " + is_sequential + "\n";
           info += "DIMENSIONS: " + dimensions + "\n\n";
+		  info += "EXTRACTOR: " + extractor + "\n";
           return info;
      }
 
@@ -146,7 +211,7 @@ public class FeatureDefinition
       * objects.
       *
       * @param	definitions	The feature definitions to describe.
-      * @return			The formatted description.
+      * @return				The formatted description.
       */
      public static String getFeatureDescriptions(FeatureDefinition[] definitions)
      {
@@ -233,11 +298,13 @@ public class FeatureDefinition
                     "<!DOCTYPE feature_key_file [\n" +
                     "   <!ELEMENT feature_key_file (comments, feature+)>\n" +
                     "   <!ELEMENT comments (#PCDATA)>\n" +
-                    "   <!ELEMENT feature (name, description?, is_sequential, parallel_dimensions)>\n" +
+                    "   <!ELEMENT feature (name, code?, description?, is_sequential, parallel_dimensions, extractor?)>\n" +
                     "   <!ELEMENT name (#PCDATA)>\n" +
+                    "   <!ELEMENT code (#PCDATA)>\n" +
                     "   <!ELEMENT description (#PCDATA)>\n" +
                     "   <!ELEMENT is_sequential (#PCDATA)>\n" +
                     "   <!ELEMENT parallel_dimensions (#PCDATA)>\n" +
+                    "   <!ELEMENT extractor (#PCDATA)>\n" +
                     "]>\n\n" +
                     "<feature_key_file>\n\n" +
                     "   <comments>" + comments + "</comments>\n\n"
@@ -249,10 +316,14 @@ public class FeatureDefinition
                {
                     writer.writeBytes("   <feature>\n");
                     writer.writeBytes("      <name>" + definitions[feat].name + "</name>\n");
+                    if (!definitions[feat].code.equals(""))
+                         writer.writeBytes("      <code>" + definitions[feat].code + "</code>\n");
                     if (!definitions[feat].description.equals(""))
                          writer.writeBytes("      <description>" + definitions[feat].description + "</description>\n");
                     writer.writeBytes("      <is_sequential>" + definitions[feat].is_sequential + "</is_sequential>\n");
                     writer.writeBytes("      <parallel_dimensions>" + definitions[feat].dimensions + "</parallel_dimensions>\n");
+                    if (!definitions[feat].extractor.equals(""))
+                         writer.writeBytes("      <extractor>" + definitions[feat].extractor + "</extractor>\n");
                     writer.writeBytes("   </feature>\n\n");
                }
                writer.writeBytes("</feature_key_file>");
