@@ -11,6 +11,7 @@ package ace.datatypes;
 import java.io.*;
 import java.util.LinkedList;
 import ace.xmlparsers.XMLDocumentParser;
+import mckay.utilities.staticlibraries.StringMethods;
 import weka.core.Instance;
 
 
@@ -270,11 +271,14 @@ public class DataSet
       * Returns the feature values stored in the feature_values field of this
       * object. The first indice of the returned array denotes the feature
       * and the second indice indicates the dimension of the feature (in order
-      * to accomodate multi-dimensional features).
+      * to accommodate multi-dimensional features).
       *
       * <p>The returned array is null if no features have been extracted. If
       * a particular feature value is not available, then a question mark is
       * returned in the appropriate entry.
+	  * 
+	  * <p>The returned array will always have numbers with period period
+	  * delimiters and no grouping delimiters.
       *
       * @param	definitions	Feature definitions that are used to get the
       *				dimensions of unknown features.
@@ -296,7 +300,7 @@ public class DataSet
                {
                     feature_values_str[i] = new String[feature_values[i].length];
                     for (int j = 0; j < feature_values[i].length; j++)
-                         feature_values_str[i][j] = String.valueOf(feature_values[i][j]);
+                         feature_values_str[i][j] = StringMethods.getCsvCompatibleDouble(feature_values[i][j]);
                }
           }
           return feature_values_str;
@@ -314,6 +318,9 @@ public class DataSet
       * first dimension is null if no features have been extracted for a given
       * sub-section. If a particular feature value is not available, then a
       * question mark is returned in the appropriate entry.
+      *
+	  * <p>The returned array will always have numbers with period period
+	  * delimiters and no grouping delimiters.
       *
       * @param	definitions   Feature definitions that are used to get the
       *                       dimensions of unknown features.

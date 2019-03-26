@@ -1,8 +1,8 @@
 /*
  * DataBoard.java
- * Version 2.2.2
+ * Version 2.2.3
  *
- * Last modified on June 11, 2011.
+ * Last modified on March 26, 2019.
  * McGill University
  */
 
@@ -10,8 +10,10 @@ package ace.datatypes;
 
 import java.io.*;
 import java.util.LinkedList;
+import mckay.utilities.staticlibraries.StringMethods;
 import weka.core.*;
 import weka.core.converters.ArffLoader;
+import weka.core.converters.ArffSaver;
 
 
 /**
@@ -156,7 +158,7 @@ public class DataBoard
       *					file holding a taxonomy. May be null
       *					if clustering is to be used to derive
       *					a new taxonomy or if a provided set of
-      *					model classificatios will be used to
+      *					model classifications will be used to
       *					construct a taxonomy. An entry of "" is
       *					considered equivalent to null.
       * @param	feature_key_file	The path of a feature_key_file XML
@@ -166,11 +168,11 @@ public class DataBoard
       *					but this is not recommended. An entry of
       *					"" is considered equivalent to null.
       * @param	feature_vector_files	An array of file paths referring to
-      *					feature_vector_files holding eature
+      *					feature_vector_files holding feature
       *                                 vectors for a set of instances. If a
       *                                 feature_key_file was provided, the
       *                                 feature_vector files are ordered and
-      *                                 compacted based on it. An entrys of "" i
+      *                                 compacted based on it. An entry of "" i
       *                                 considered equivalent to null.
       * @param	taxonomy_file		The path of a taxonomy_file XML file
       *					holding the model classifications that
@@ -507,7 +509,7 @@ public class DataBoard
       * saved. If the taxonomy field is null, then the class names are extracted
       * from the model_classifications field if it is not null.
       *
-      * <p><b>IMPORTANT:</b> Since ARFF files cannot accomodate multiple classes
+      * <p><b>IMPORTANT:</b> Since ARFF files cannot accommodate multiple classes
       * per instance, the feature vector for an instance with multiple classes
       * is repeated twice, once for each class.
       *
@@ -802,12 +804,13 @@ public class DataBoard
       * line saved to the ARFF file, with the entry identifying the data set and
       * (if appropriate) the section that each ARFF data line corresponds to.
       *
-      * <p><b>IMPORTANT:</b> Since ARFF files cannot accomodate multiple classes
+      * <p><b>IMPORTANT:</b> Since ARFF files cannot accommodate multiple classes
       * per instance, the feature vector for an instance with multiple classes
       * is repeated twice, once for each class.
       *
-      * <p><b>IMPORTANT:</b> All class names and feature names have blank
-      * spaces replaced by underscores in the ARFF file.
+	 * <p><b>IMPORTANT:</b> All feature names have blank spaces replaced by 
+	 * underscores, have their feature codes pre-pended to them, and are
+	 * then URL-encoded, before they are saved in the ARFF file.</p>
       *
       * @param	relation_name                The name of the relation that is
       *                                      being saved to the ARFF file.
@@ -826,7 +829,8 @@ public class DataBoard
       *                                      feature vectors are provided. An
       *                                      exception is also thrown if both
       *                                      of the boolean parameters are
-      *                                      false.
+      *                                      false. An exception is also thrown
+	  *                                      if an error occurs during saving.
       */
      public String[] saveToARFF( String relation_name,
           File databoard_file,
@@ -854,10 +858,209 @@ public class DataBoard
 						"definitions are available." );
 		  }
 
+		  /* BEGINNING OF NEW CODE FOR SAVING USE WEKA LIBRARY */
+		  
+		  // Prepare the list of feature names
+		  LinkedList<String> all_feature_names_list = new LinkedList<>();
+          for (int i = 0; i < these_feature_definitions.length; i++)
+          {
+               if (these_feature_definitions[i].dimensions == 1)
+                    all_feature_names_list.add(getEncodedFeatureName(these_feature_definitions[i], true, true, true));
+			   else for (int j = 0; j < these_feature_definitions[i].dimensions; j++)
+                    all_feature_names_list.add(getEncodedFeatureName(these_feature_definitions[i], true, true, true) + "_" + j);
+          }
+		  int number_features_combined = all_feature_names_list.size();
+		  
+          // Prepare the array of all present class names (will be null if this information is not available
+          String[] all_class_names_array = getClassNames();
+		  boolean model_classifications_available = false;
+		  if (all_class_names_array != null && all_class_names_array.length != 0)
+               model_classifications_available = true;
+		  
+          // Prepare the arrays holding model classifications, both overall overall and of their sections
+          String[][] model_classifications_overall = null;
+          String[][][] model_classifications_sections = null;
+          if (model_classifications != null)
+          {
+               if (use_top_level_features)
+                    model_classifications_overall =
+                         SegmentedClassification.getOverallLabelsOfDataSets( feature_vectors,
+                         model_classifications );
+               if (use_sub_section_features)
+                    model_classifications_sections =
+                         SegmentedClassification.getSubSectionLabelsOfDataSets( feature_vectors,
+                         model_classifications );
+          }
+		  
+          // Prepare the array of feature vectors and (if available) model classifications for each instance
+		  LinkedList<String[]> all_feature_vectors_list = new LinkedList<>();
+		  LinkedList<String> all_model_classifications_list = new LinkedList<>();
+          LinkedList<String> identifiers = new LinkedList<>();
+          for (int i = 0; i < feature_vectors.length; i++)
+          {
+               // Process top-level overall features
+               if (use_top_level_features)
+               {
+					// The feature vector to add to for the current instance
+					LinkedList<String> this_instance_feature_vector_list = new LinkedList<>();
+
+					// Find the top-level overall feature values
+                    String[][] top_feat_vals = feature_vectors[i].getFeatureValuesOfTopLevel(these_feature_definitions);
+
+                    // Store the top-level overall feature values
+                    if (top_feat_vals != null)
+                    {
+                         // May need to repeat a given instance multiple times if it has multiple classes
+                         int classes = 1;
+                         if (model_classifications_overall != null)
+                              if (model_classifications_overall[i] != null)
+                                   classes = model_classifications_overall[i].length;
+
+                         // Store the feature vector(s) and model class(es) for this instance
+                         for (int cla = 0; cla < classes; cla++)
+                              for (int j = 0; j < top_feat_vals.length; j++)
+                                   for (int k = 0; k < top_feat_vals[j].length; k++)
+								   {
+										// Store the feature values
+										this_instance_feature_vector_list.add(top_feat_vals[j][k]);
+
+										// Store the model classification(s)
+										if ( j == top_feat_vals.length - 1 && k == top_feat_vals[j].length - 1 )
+										{
+											 // Store the class
+											 if (model_classifications_overall != null && model_classifications_overall[i] != null)
+												  all_model_classifications_list.add(model_classifications_overall[i][cla]);
+											 
+											 // Store the identifier
+											 identifiers.add(feature_vectors[i].identifier);
+										}
+								   }
+
+                         // Store the feature vector for this instance
+                         all_feature_vectors_list.add(this_instance_feature_vector_list.toArray(new String[this_instance_feature_vector_list.size()]));
+					}
+               }
+
+               // Process features of sub-sections
+               if (use_sub_section_features)
+               {
+					// The feature vector to add to for the current instance
+					LinkedList<String> this_instance_feature_vector_list = new LinkedList<>();
+
+					// Find the sub-section feature values
+                    String[][][] sec_feat_vals = feature_vectors[i].getFeatureValuesOfSubSections(these_feature_definitions);
+
+                    // Store the sub-section feature values for each sub-section
+                    if (sec_feat_vals != null)
+                    {
+                         for (int sec = 0 ; sec < sec_feat_vals.length; sec++)
+                         {
+                              if (sec_feat_vals[sec] != null)
+                              {
+                                   // May need to repeat a given instance multiple times if it has multiple 
+								   // classes
+                                   int classes = 1;
+                                   if (model_classifications_sections != null)
+                                        if (model_classifications_sections[i] != null)
+                                             if (model_classifications_sections[i][sec] != null)
+                                                  classes = model_classifications_sections[i][sec].length;
+
+                                   // Store the feature vector(s) and model class(es) for this instance
+                                   for (int cla = 0; cla < classes; cla++)
+                                        for (int j = 0; j < sec_feat_vals[sec].length; j++)
+                                             for (int k = 0; k < sec_feat_vals[sec][j].length; k++)
+											 {
+												// Store the feature values
+												this_instance_feature_vector_list.add(sec_feat_vals[sec][j][k]);
+
+												// Store the model classification(s)
+												if ( j == sec_feat_vals[sec].length - 1 && k == sec_feat_vals[sec][j].length - 1 )
+												{
+													 // Store the class
+													 if ( model_classifications_sections != null && 
+														  model_classifications_sections[i] != null && 
+														  model_classifications_sections[i][sec] != null )
+															   all_model_classifications_list.add(model_classifications_sections[i][sec][cla]);
+
+													 // Store the identifier
+													 identifiers.add(feature_vectors[i].identifier + ":  Start=" + feature_vectors[i].sub_sets[sec].start + "Stop=" + feature_vectors[i].sub_sets[sec].stop);
+												}
+											 }
+                              }
+                         }
+
+						 // Store the feature vector for this instance
+                         all_feature_vectors_list.add(this_instance_feature_vector_list.toArray(new String[this_instance_feature_vector_list.size()]));
+                    }
+               }
+          }		  
+		  
+          // Set the name of the dataset to the name of the file
+          // that is to be saved
+          String data_set_name = relation_name;
+
+          // Set the Attributes (feature names part)
+          String[] all_feature_names_array = all_feature_names_list.toArray(new String[all_feature_names_list.size()]);
+		  FastVector attributes_vector;
+		  if (model_classifications_available) attributes_vector = new FastVector(all_feature_names_array.length + 1); // extra 1 is for class name
+		  else attributes_vector = new FastVector(all_feature_names_array.length);
+          for (int feat = 0; feat < all_feature_names_array.length; feat++)
+               attributes_vector.addElement(new Attribute(all_feature_names_array[feat]));
+		  
+          // Set the Attributes (class names part), if available
+		  if (model_classifications_available)
+		  {
+               FastVector class_names_vector = new FastVector(all_class_names_array.length);
+               for (int cat = 0; cat < all_class_names_array.length; cat++)
+				  class_names_vector.addElement(all_class_names_array[cat]);
+               attributes_vector.addElement(new Attribute("CLASS", class_names_vector));
+		  }
+		  
+          // Store attributes in an Instances object
+          Instances instances = new Instances(data_set_name, attributes_vector, all_feature_vectors_list.size());
+          if (model_classifications_available) instances.setClassIndex(instances.numAttributes() - 1);
+
+          // Store the feature values and (if available) model classifications
+          for (int inst = 0; inst < all_feature_vectors_list.size(); inst++)
+          {
+               // Initialize an instance
+               Instance this_instance = new Instance(instances.numAttributes());
+               this_instance.setDataset(instances);
+
+               // Set feature values for the instance
+               for (int feat = 0; feat < number_features_combined; feat++)
+			   {
+				  double this_feature_value = Double.parseDouble(all_feature_vectors_list.get(inst)[feat]);
+				  this_instance.setValue(feat, this_feature_value);
+			   }
+
+               // Set the class value for the instance if it's available
+               if (model_classifications_available) this_instance.setClassValue(all_model_classifications_list.get(inst));
+               
+			   // Set the relationship name
+			   instances.setRelationName(relation_name);
+
+               // Add this instance to instances
+               instances.add(this_instance);
+          }		  
+
+		  // Delete any pre-existing file at the same path if it exists
+		  // mckay.utilities.staticlibraries.FileMethods.deleteFileIfItExists(databoard_file);
+
+          // Save the ARFF file
+          ArffSaver arff_saver = new ArffSaver();
+          arff_saver.setInstances(instances);
+          arff_saver.setFile(databoard_file);
+          arff_saver.setDestination(mckay.utilities.staticlibraries.FileMethods.getDataOutputStream(databoard_file));
+          try { arff_saver.writeBatch(); }
+          catch (Exception e) { throw new Exception("File only partially saved.\n\nTry resaving the file with a .arff extension." ); }		  
+		  
+		  /* OLD METHOD THAT DID NOT USE WEKA LIBRARIES
+		  
           // Prepare stream writer
           FileOutputStream to = new FileOutputStream(databoard_file);
           DataOutputStream writer = new DataOutputStream(to);
-
+		  
           // Write the relation name
           writer.writeBytes("@relation " + relation_name + "\n\n");
 
@@ -865,10 +1068,10 @@ public class DataBoard
           for (int i = 0; i < these_feature_definitions.length; i++)
           {
                if (these_feature_definitions[i].dimensions == 1)
-                    writer.writeBytes("@attribute " + these_feature_definitions[i].name.replace(' ', '_') + " numeric\n");
+                    writer.writeBytes("@attribute " + getEncodedFeatureName(these_feature_definitions[i]) + " numeric\n");
                else
                     for (int j = 0; j < these_feature_definitions[i].dimensions; j++)
-                         writer.writeBytes("@attribute " + these_feature_definitions[i].name.replace(' ', '_') + "_" + j + " numeric\n");
+                         writer.writeBytes("@attribute " + getEncodedFeatureName(these_feature_definitions[i]) + "_" + j + " numeric\n");
           }
 
           // Write the class names
@@ -1005,10 +1208,12 @@ public class DataBoard
                     }
                }
           }
-
+		  
           // Close the output streams
           writer.close();
           to.close();
+		  
+		  */
 
           // Return the identifiers
           return identifiers.toArray(new String[1]);
@@ -1032,9 +1237,9 @@ public class DataBoard
 	 * null, then the class names are extracted from the model_classifications field if it is not null. If
 	 * no classification are available, none are saved. Since CSV files cannot explicitly accommodate multiple
 	 * classes per instance, the vector for an instance with multiple classes is repeated multiple times, once
-	 * for each class. <b>WARNING:</b> saving of class names has not yet been fully tested.</p>
+	 * for each class.
 	 *
-	 * <p><b>IMPORTANT:</b> All feature names and class names have blank spaces replaced by underscores in the
+	 * <p><b>IMPORTANT:</b> All feature names have their feature codes pre-pended before they are saved in the
 	 * CSV file.</p>
 	 *
 	 * <p><b>IMPORTANT:</b> Missing feature values are marked with a question sign.</p>
@@ -1050,6 +1255,13 @@ public class DataBoard
 	 *											instances.
 	 * @param	include_sub_section_features	Whether or not to save the sub-sections features of individual 
 	 *											instances.
+	 * @param	url_encode_feature_names		Whether or not feature names are to first have their names
+	 *											replaced by underscores and then get URL-encoded 
+	 *											before saving (to help deal with special characters).
+	 * @param	url_encode_instance_identifiers	Whether or not instance identifiers are to be URL-encoded 
+	 *											before saving (to help deal with special characters).
+	 * @param	url_encode_class_names			Whether or not class names are to be URL-encoded before saving
+	 *											(to help deal with special characters).
 	 * @return									The dataset and section identifiers corresponding to each
 	 *											feature vector line saved in the CSV file.
 	 * @throws	Exception						An exception is thrown if no feature definitions or no feature
@@ -1061,7 +1273,10 @@ public class DataBoard
 							   boolean include_instance_identifiers,
 							   boolean include_class_names,
 							   boolean include_top_level_features,
-							   boolean include_sub_section_features )
+							   boolean include_sub_section_features,
+							   boolean url_encode_feature_names,
+							   boolean url_encode_instance_identifiers,
+							   boolean url_encode_class_names )
 	throws Exception
 	{
 		// Throw exceptions if the feature vectors
@@ -1098,24 +1313,28 @@ public class DataBoard
 		if (include_feature_names)
 		{
 			if (include_instance_identifiers)
-				writer.writeBytes(",");
+				writer.writeBytes("INSTANCE_ID,");
 			
 			for (int i = 0; i < these_feature_definitions.length; i++)
 			{
 				if (these_feature_definitions[i].dimensions == 1)
-					writer.writeBytes(these_feature_definitions[i].name.replace(' ', '_'));
+					writer.writeBytes("\"" + getEncodedFeatureName(these_feature_definitions[i], true, url_encode_feature_names, url_encode_feature_names) + "\"");
 				else
 				{
 					for (int j = 0; j < these_feature_definitions[i].dimensions; j++)
 					{
-						writer.writeBytes(these_feature_definitions[i].name.replace(' ', '_') + "_" + j);
+						writer.writeBytes("\"" + getEncodedFeatureName(these_feature_definitions[i], true, url_encode_feature_names, url_encode_feature_names) + "_" + j + "\"");
 						if (j != these_feature_definitions[i].dimensions - 1)
 							writer.writeBytes(",");
 					}
 				}
 
 				if (i == these_feature_definitions.length - 1)
+				{
+					if (include_class_names)
+						writer.writeBytes(",CLASS_LABEL");
 					writer.writeBytes("\n");
+				}
 				else
 					writer.writeBytes(",");
 			}
@@ -1166,8 +1385,13 @@ public class DataBoard
 					{
 						// Write the insantce identifier, if requested
 						if (include_instance_identifiers)
-							writer.writeBytes("\"" + feature_vectors[i].identifier + "\",");
-
+						{
+							if (url_encode_instance_identifiers)
+								writer.writeBytes("\"" + getEncodedString(feature_vectors[i].identifier) + "\",");
+							else
+								writer.writeBytes("\"" + feature_vectors[i].identifier + "\",");
+						}
+							
 						// Write the feature values and model classifications
 						for (int j = 0; j < top_feat_vals.length; j++)
 						{
@@ -1181,9 +1405,17 @@ public class DataBoard
 								{
 									if (model_classifications_overall != null)
 									{
-										if (model_classifications_overall[i] != null)
-											writer.writeBytes(", " + model_classifications_overall[i][cla].replace(' ', '_'));
-										else writer.writeBytes(", ?");
+										if (include_class_names)
+										{
+											if (model_classifications_overall[i] != null)
+											{
+												if (url_encode_class_names)
+													writer.writeBytes(",\"" + getEncodedString(model_classifications_overall[i][cla]) + "\"");
+												else
+													writer.writeBytes(",\"" + model_classifications_overall[i][cla] +"\"");
+											}
+											else writer.writeBytes(",?");
+										}
 									}
 									writer.writeBytes("\n");
 
@@ -1224,7 +1456,12 @@ public class DataBoard
 							{
 								// Write the insantce identifier, if requested
 								if (include_instance_identifiers)
-									writer.writeBytes("\"" + feature_vectors[i].identifier + "_" + sec + "\",");
+								{
+									if (url_encode_instance_identifiers)
+										writer.writeBytes("\"" + getEncodedString(feature_vectors[i].identifier) + "_" + sec + "\",");
+									else
+										writer.writeBytes("\"" + feature_vectors[i].identifier + "_" + sec + "\",");
+								}
 
 								for (int j = 0; j < sec_feat_vals[sec].length; j++)
 								{
@@ -1240,9 +1477,17 @@ public class DataBoard
 											{
 												if (model_classifications_sections[i] != null)
 												{
-													if (model_classifications_sections[i][sec] != null)
-														writer.writeBytes(", " + model_classifications_sections[i][sec][cla].replace(' ', '_'));
-													else writer.writeBytes(", ?");
+													if (include_class_names)
+													{
+														if (model_classifications_sections[i][sec] != null)
+														{
+															if (url_encode_class_names)
+																writer.writeBytes(",\"" + getEncodedString(model_classifications_sections[i][sec][cla]) + "\"");
+															else
+																writer.writeBytes(",\"" + model_classifications_sections[i][sec][cla] + "\"");
+														}
+														else writer.writeBytes(",?");
+													}
 												}
 											}
 											writer.writeBytes("\n");
@@ -1415,7 +1660,64 @@ public class DataBoard
      }
 
 
+     /**
+      * Returns true if either the array of DataSet objects or SegmentedClassification
+      * object of this DataBoard has sub-sections.
+      *
+      * @return     True if either the DataSet of SegmentedClassification of this
+      *             DataBoard has sub-sections.
+      */
+     public boolean hasSections()
+     {
+         if(feature_vectors!=null)
+         {
+            for(int i = 0; i < feature_vectors.length; i++)
+                 if (feature_vectors[i].sub_sets != null)
+                 {
+                     return true;
+                 }
+         }
+         if(model_classifications!= null)
+         {
+            for(int i = 0; i < model_classifications.length; i++)
+                if (model_classifications[i].sub_classifications != null)
+                     return true;
+         }
+         return false;
+     }
 
+	 
+     /**
+      * Returns the number of top-level instances contained in this DataBoard.
+      *
+      * @return the number of top-level instances contained in this DataBoard.
+      */
+     public int getNumOverall()
+     {
+         int num_overall = feature_vectors.length;
+         return num_overall;
+     }
+
+	 
+     /**
+      * Returns the total number of instances (top-level and subsections) contained in
+      * this DataBoard.
+      *
+      * @return the total number of instances contained in this DataBoard.
+      */
+     public int getNumTotal()
+     {
+         int num_overall = getNumOverall();
+         int num_total = num_overall;
+         for(int i=0; i < num_overall; i++)
+         {
+            if (feature_vectors[i].sub_sets != null)
+                num_total += feature_vectors[i].sub_sets.length;
+         }
+         return num_total;
+     }
+
+	 
      /* PRIVATE METHODS *******************************************************/
 
 
@@ -1471,62 +1773,46 @@ public class DataBoard
                return null;
      }
 
-
-
-     /**
-      * Returns true if either the array of DataSet objects or SegmentedClassification
-      * object of this DataBoard has sub-sections.
-      *
-      * @return     True if either the DataSet of SegmentedClassification of this
-      *             DataBoard has sub-sections.
-      */
-     public boolean hasSections()
+	 
+	 /**
+	  * Returns a String consisting of the given feature's feature name and possibly its code, with optional
+	  * encoding.
+	  * 
+	  * @param feature_definition	A FeatureDefinition whose code and name are to be encoded.
+	  * @param add_feature_code		Whether or not to prepend the feature's code to its name.
+	  * @param replace_spaces		Whether or not spaces are to be replaced by underscores.
+	  * @param url_encode			Whether or not the feature name is to be URL-encoded.
+	  * @return						The code for the FeatureDefinition.
+	  * @throws Exception			Throws an Exception if a problem occurs.
+	  */
+     private String getEncodedFeatureName( FeatureDefinition feature_definition,
+	                                       boolean add_feature_code,
+										   boolean replace_spaces,
+										   boolean url_encode)
+			 throws Exception
      {
-         if(feature_vectors!=null)
-         {
-            for(int i = 0; i < feature_vectors.length; i++)
-                 if (feature_vectors[i].sub_sets != null)
-                 {
-                     return true;
-                 }
-         }
-         if(model_classifications!= null)
-         {
-            for(int i = 0; i < model_classifications.length; i++)
-                if (model_classifications[i].sub_classifications != null)
-                     return true;
-         }
-         return false;
+		 String encoded_feature_name = feature_definition.name;
+		 if (add_feature_code)
+			 encoded_feature_name = feature_definition.code + " " + encoded_feature_name;
+		 if (replace_spaces)
+			 encoded_feature_name = encoded_feature_name.replace(' ', '_');
+		 if (url_encode)
+			 encoded_feature_name = getEncodedString(encoded_feature_name);
+		 return encoded_feature_name;
      }
 
-     /**
-      * Returns the number of top-level instances contained in this DataBoard.
-      *
-      * @return the number of top-level instances contained in this DataBoard.
-      */
-     public int getNumOverall()
+	 
+	 /**
+	  * Returns a String consisting of the URL-encoding of to_encode. This is useful for ensuring
+	  * compatibility with software not compatible with special characters.
+	  * 
+	  * @param to_encode	The Sting to encode.
+	  * @return				The encoding of to_encode.
+	  * @throws Exception	Throws an Exception if a problem occurs.
+	  */
+     private String getEncodedString(String to_encode)
+			 throws Exception
      {
-         int num_overall = feature_vectors.length;
-         return num_overall;
+		 return StringMethods.URLEncodeWithNulls(to_encode);
      }
-
-     /**
-      * Returns the total number of instances (top-level and subsections) contained in
-      * this DataBoard.
-      *
-      * @return the total number of instances contained in this DataBoard.
-      */
-     public int getNumTotal()
-     {
-         int num_overall = getNumOverall();
-         int num_total = num_overall;
-         for(int i=0; i < num_overall; i++)
-         {
-            if (feature_vectors[i].sub_sets != null)
-                num_total += feature_vectors[i].sub_sets.length;
-
-         }
-         return num_total;
-     }
-
 }

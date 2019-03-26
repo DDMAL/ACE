@@ -11,7 +11,6 @@ import ace.datatypes.*;
 import java.io.*;
 import java.text.*;
 import java.util.LinkedList;
-import java.util.Arrays;
 import weka.classifiers.*;
 import weka.core.*;
 import weka.classifiers.bayes.*;
