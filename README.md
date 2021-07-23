@@ -1,7 +1,7 @@
 # ACE 2.2.2
-by Cory McKay (ACE 1.x) and Jessica Thompson (ACE 2.x)
+by Cory McKay (ACE 1.x and 2.x) and Jessica Thompson (ACE 2.x)
 CIRMMT / Marianopolis College / McGill University
-Copyright (C) 2017 (GNU GPL)
+Copyright (C) 2021 (GNU GPL)
 
 
 ### OVERVIEW
@@ -76,9 +76,10 @@ theoretically run under OS X, Linux, Solaris or any other operating system with
 the JRE installed on it, users should be advised that the software has not yet 
 been fully tested on other platforms, so difficulties may be encountered.
 
-This software was developed with version 1.6.0_16 of the JDK (Java Development 
-Kit), so it is suggested that the corresponding version or higher of the JRE be
-installed on the user's computer.
+The current version of ACE was developed and tested with version 16 of the
+JDK (Java Development Kit), and because it uses certain features not necessarily
+present in earlier versions of Java, it is suggested that users have Java 16 or
+later installed on their systems in order to run jSymbolic properly.
 
 
 ### INSTALLING THE JAVA RUNTIME ENVIRONMENT

@@ -286,7 +286,7 @@ public class DimensionalityReducer
                     stop_time = System.currentTimeMillis();
                     feature_selectors.add(this_feature_selector);
                     selector_descriptions.add("Principal Components Analysis (PCA)");
-                    preparation_times_list.add(new Double(((double) (stop_time - start_time)) / 60000.0));
+                    preparation_times_list.add(Double.valueOf(((double) (stop_time - start_time)) / 60000.0));
                 }
 
                 if(selectors.contains("EXB"))
@@ -308,7 +308,7 @@ public class DimensionalityReducer
 			stop_time = System.currentTimeMillis();
 			feature_selectors.add(this_feature_selector);
 			selector_descriptions.add("Exhaustive search using naive Bayesian classifier");
-			preparation_times_list.add(new Double(((double) (stop_time - start_time)) / 60000.0));
+			preparation_times_list.add(Double.valueOf(((double) (stop_time - start_time)) / 60000.0));
                     }
                     else
                         out.write(("WARNING: Exhaustive search will not be performed because data has more than " + max_attribute + " attributes.").getBytes());
@@ -330,7 +330,7 @@ public class DimensionalityReducer
                     stop_time = System.currentTimeMillis();
                     feature_selectors.add(this_feature_selector);
                     selector_descriptions.add("Genetic search using naive Bayesian classifier");
-                    preparation_times_list.add(new Double(((double) (stop_time - start_time)) / 60000.0));
+                    preparation_times_list.add(Double.valueOf(((double) (stop_time - start_time)) / 60000.0));
 
                     // Store the preparation times
                     Double[] times = preparation_times_list.toArray(new Double[1]);

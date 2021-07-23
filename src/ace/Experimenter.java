@@ -452,7 +452,7 @@ public class Experimenter
         int j = 0;
         for(int i=0; i<instances2.numInstances(); i++)
         {
-            if(!indeces_list.contains(new Integer(i)))
+            if(!indeces_list.contains(Integer.valueOf(i)))
             {
                 instances.add(instances2.instance(i));
                 hierarchy[j] = hierarchy2[i];

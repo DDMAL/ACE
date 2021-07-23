@@ -590,7 +590,7 @@ public class DataBoard
                                    {
                                    // Store feature values in instance
                                    if (!top_feat_vals[j][k].equals("?"))
-                                        this_instance.setValue(current_attribute, (new Double(top_feat_vals[j][k])).doubleValue());
+                                        this_instance.setValue(current_attribute, (Double.valueOf(top_feat_vals[j][k])).doubleValue());
                                    current_attribute++;
 
                                    // Store model classification in instance
@@ -641,7 +641,7 @@ public class DataBoard
                                              {
                                              // Store feature values in instance
                                              if (!sec_feat_vals[sec][j][k].equals("?"))
-                                                  this_instance.setValue(current_attribute, (new Double(sec_feat_vals[sec][j][k])).doubleValue());
+                                                  this_instance.setValue(current_attribute, (Double.valueOf(sec_feat_vals[sec][j][k])).doubleValue());
                                              current_attribute++;
 
                                              // Write the model classification if features done

@@ -521,9 +521,9 @@ public class InstancesTableModel
               if(is_section)
                  row_contents[0] = null;
               else if (should_be_expanded)
-                  row_contents[0] = new Boolean(true);
+                  row_contents[0] = true;
               else
-                  row_contents[0] = new Boolean(false);
+                  row_contents[0] = false;
               row_contents[1] = identifier;
               current_column = 2;
           }

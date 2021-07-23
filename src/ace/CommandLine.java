@@ -272,9 +272,9 @@ public class CommandLine
             if (feature_selector.length() == 0)
                 feature_selector = null;
             if (max_spread_option.length() != 0)
-                max_spread = (new Double(max_spread_option)).doubleValue();
+                max_spread = (Double.valueOf(max_spread_option)).doubleValue();
             if (max_membersip_option.length() != 0)
-                max_membership = (new Double(max_membersip_option)).doubleValue();
+                max_membership = (Double.valueOf(max_membersip_option)).doubleValue();
             if (Utils.getFlag("rand_ord", options))
                 order_randomly = true;
             if (Utils.getFlag("sarff", options))
@@ -548,7 +548,7 @@ public class CommandLine
             else if (cross_validation_string != null)
             {
                 String file_name = save_file;
-                int number_folds = (new Integer(cross_validation_string)).intValue();
+                int number_folds = (Integer.valueOf(cross_validation_string)).intValue();
                 if (number_folds < 2)
                     throw new Exception("Must be at least 2 cross-validation folds");
                 OutputStream out = System.out;
@@ -578,7 +578,7 @@ public class CommandLine
                         file_name = mckay.utilities.staticlibraries.StringMethods.removeExtension(file_name);
                 }
 
-                int number_folds = (new Integer(experimentation_string)).intValue();
+                int number_folds = (Integer.valueOf(experimentation_string)).intValue();
                 if (number_folds < 2)
                     throw new Exception("Must be at least 2 cross-validation folds");
                 // Progress will be written to standard out

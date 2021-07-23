@@ -396,8 +396,8 @@ public class FeatureDefinitionsPanel
           // Set up feature
           Object[] new_feature = new Object[4];
           new_feature[0] = new_name;
-          new_feature[1] = new Integer(1);
-          new_feature[2] = new Boolean(false);
+          new_feature[1] = 1;
+          new_feature[2] = false;
           new_feature[3] = "This is a newly added feature.";
 
           // Add the feature

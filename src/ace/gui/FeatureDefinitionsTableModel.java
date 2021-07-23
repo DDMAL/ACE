@@ -78,8 +78,8 @@ public class FeatureDefinitionsTableModel
                // Set up row
                Object[] row_contents = new Object[4];
                row_contents[0] = feature_definitions[i].name;
-               row_contents[1] = new Integer(feature_definitions[i].dimensions);
-               row_contents[2] = new Boolean(feature_definitions[i].is_sequential);
+               row_contents[1] = feature_definitions[i].dimensions;
+               row_contents[2] = feature_definitions[i].is_sequential;
                row_contents[3] = feature_definitions[i].description;
 
                // Add the row
