@@ -330,7 +330,7 @@ public class MainGUIFrame
 
           // React to the about_menu_item
           if (event.getSource().equals(about_menu_item))
-               new mckay.utilities.gui.templates.AboutDialog(this, "ACE 2.2.2", "Cory McKay (ACE 1.x and 2.x) and Jessica Thompson (ACE 2.x)", "2021 (GNU GPL)", "Marianopolis College and McGill University");
+               new mckay.utilities.gui.templates.AboutDialog(this, "ACE 2.2.2", "Cory McKay (ACE 1.x and 2.x) and Jessica Thompson (ACE 2.x)", "2022 (GNU GPL)", "Marianopolis College and McGill University");
 
           // React to the view_manual_menu_item
           if (event.getSource().equals(view_manual_menu_item))
